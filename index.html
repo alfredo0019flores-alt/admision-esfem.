@@ -6,14 +6,14 @@
     <title>Registro y Ranking ESFEM 2026</title>
     <style>
         :root { --primary: #1a5c37; --secondary: #27ae60; --bg: #f0f2f5; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg); margin: 0; padding: 20px; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); margin: 0; padding: 20px; }
         .container { max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); }
         h1 { text-align: center; color: var(--primary); margin-bottom: 5px; }
         p.subtitle { text-align: center; color: #666; margin-bottom: 30px; }
         
         .form-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; background: #f9f9f9; padding: 20px; border-radius: 10px; border: 1px solid #eee; }
         label { font-weight: bold; color: #333; display: block; margin-bottom: 5px; }
-        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
+        input, select { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
         
         button { grid-column: span 1; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; transition: 0.3s; margin-top: 10px; }
         button:hover { background: #0d3d25; }
@@ -24,14 +24,13 @@
         th { background: var(--primary); color: white; }
         .in-quota { background-color: #d1e7dd; font-weight: bold; color: #0f5132; }
         .out-quota { background-color: #fff3cd; color: #856404; }
-        .badge { padding: 4px 8px; border-radius: 4px; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="container">
     <h1>Admisión ESFEM 2026</h1>
-    <p class="subtitle">Registro de Postulantes y Tabulación de Notas</p>
+    <p class="subtitle">Registro de Postulantes y Ranking en Tiempo Real</p>
     
     <div class="form-container">
         <div>
@@ -43,15 +42,15 @@
             <input type="date" id="fechaNac">
         </div>
         <div>
-            <label>Nota Examen:</label>
-            <input type="number" id="nota" placeholder="Ej: 75">
+            <label>Nota Obtenida:</label>
+            <input type="number" id="nota" placeholder="Ej: 80">
         </div>
         <div>
-            <label>ESFM / Especialidad:</label>
+            <label>ESFEM / Especialidad:</label>
             <select id="esfmSelect">
                 <option value="">-- Seleccionar --</option>
                 <optgroup label="BENI">
-                    <option value="BENI CLARA PARADA - Biografía|35">CLARA PARADA - Biografía/Geografía (35)</option>
+                    <option value="BENI CLARA PARADA - Biología|35">CLARA PARADA - Biografía/Geografía (35)</option>
                     <option value="BENI CLARA PARADA - Sociales|35">CLARA PARADA - Sociales (35)</option>
                     <option value="BENI CLARA PARADA - Primaria|35">CLARA PARADA - Primaria (35)</option>
                     <option value="BENI RIBERALTA - Biología|35">RIBERALTA - Biología/Geografía (35)</option>
@@ -63,29 +62,26 @@
                     <option value="LA PAZ SANTIAGO DE HUATA - Primaria|70">SANTIAGO DE HUATA - Primaria (70)</option>
                     <option value="LA PAZ WARISATA - Inicial|70">WARISATA - Inicial (70)</option>
                 </optgroup>
-                <optgroup label="SANTA CRUZ">
-                    <option value="SANTA CRUZ ENRIQUE FINOT - Sociales|70">ENRIQUE FINOT - Sociales (70)</option>
-                    <option value="SANTA CRUZ ENRIQUE FINOT - Matemáticas|35">ENRIQUE FINOT - Matemáticas (35)</option>
-                    <option value="SANTA CRUZ RAFAEL CHÁVEZ - Primaria|70">RAFAEL CHÁVEZ - Primaria (70)</option>
-                </optgroup>
                 <optgroup label="TARIJA">
                     <option value="TARIJA JUAN MISAEL SARACHO - Primaria|35">JUAN MISAEL SARACHO - Primaria (35)</option>
                     <option value="TARIJA UA TARIJA - Inicial|35">UA TARIJA - Inicial (35)</option>
                     <option value="TARIJA UA GRAN CHACO - Inicial|35">UA GRAN CHACO - Inicial (35)</option>
                 </optgroup>
-            </select>
+                </select>
         </div>
-        <button onclick="enviarDatos()">Registrar Postulante</button>
+        <button onclick="enviarDatos()">Registrar y Guardar</button>
     </div>
 
     <div class="tables-section" id="resultados">
-        <p style="text-align:center; color:#999;">Aún no hay datos registrados.</p>
+        <p style="text-align:center; color:#999;">Aún no hay registros en esta sesión.</p>
     </div>
 </div>
 
 <script>
+    // 1. REEMPLAZA ESTA URL CON TU NUEVA URL DE IMPLEMENTACIÓN (LA QUE TERMINA EN /EXEC)
     const URL_SCRIPT = "https://script.google.com/macros/s/AKfycbwHh43b_XjqQ5PXlc_-MAAd6A5dTTjtxau5GQTHQJiQXPy2BumG9LuR_5X-_Vz0yIk6QQ/exec";
-    let listaPostulantes = [];
+    
+    let listaLocal = [];
 
     function enviarDatos() {
         const ci = document.getElementById('ci').value;
@@ -94,66 +90,67 @@
         const esfmSelect = document.getElementById('esfmSelect').value;
 
         if (!ci || !fecha || isNaN(nota) || !esfmSelect) {
-            alert("Por favor rellena todos los campos correctamente.");
+            alert("Completa todos los campos correctamente.");
             return;
         }
 
         const [nombreEsfm, plazas] = esfmSelect.split('|');
-        const data = { ci, fecha, nota, nombreEsfm };
+        const objetoDatos = {
+            ci: ci,
+            fecha: fecha,
+            nota: nota,
+            nombreEsfm: nombreEsfm
+        };
 
-        // 1. Enviar a Google Sheets
+        // ENVIAR A GOOGLE SHEETS (Modo Corregido para evitar error JSON)
         fetch(URL_SCRIPT, {
             method: 'POST',
-            mode: 'no-cors',
+            mode: 'no-cors', 
+            cache: 'no-cache',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify(objetoDatos)
         });
 
-        // 2. Guardar en memoria local para mostrar el ranking inmediato
-        listaPostulantes.push({ ...data, plazas: parseInt(plazas) });
+        // ACTUALIZAR INTERFAZ LOCAL
+        listaLocal.push({ ...objetoDatos, plazas: parseInt(plazas) });
         dibujarTablas();
 
-        // 3. Limpiar formulario
+        // Limpiar
         document.getElementById('ci').value = "";
         document.getElementById('nota').value = "";
-        alert("¡Datos guardados! Revisa el ranking abajo.");
+        alert("Enviado con éxito. Los datos aparecerán en tu Google Sheets en segundos.");
     }
 
     function dibujarTablas() {
-        const div = document.getElementById('resultados');
-        div.innerHTML = "";
+        const contenedor = document.getElementById('resultados');
+        contenedor.innerHTML = "";
 
-        // Agrupar por ESFEM
         const grupos = {};
-        listaPostulantes.forEach(p => {
+        listaLocal.forEach(p => {
             if (!grupos[p.nombreEsfm]) grupos[p.nombreEsfm] = [];
             grupos[p.nombreEsfm].push(p);
         });
 
         for (const esfm in grupos) {
-            // Ordenar por nota de mayor a menor
             grupos[esfm].sort((a, b) => b.nota - a.nota);
-
             let plazasTotal = grupos[esfm][0].plazas;
-            let tablaHTML = `<h3>${esfm} <span style="font-size:14px; color:#666;">(Cupos: ${plazasTotal})</span></h3>`;
-            tablaHTML += `<table>
-                <thead>
-                    <tr><th>Pos.</th><th>CI</th><th>Nota</th><th>Estado</th></tr>
-                </thead>
+            
+            let html = `<h3>${esfm} (Cupos: ${plazasTotal})</h3>`;
+            html += `<table>
+                <thead><tr><th>Pos.</th><th>CI</th><th>Nota</th><th>Estado</th></tr></thead>
                 <tbody>`;
 
             grupos[esfm].forEach((p, i) => {
-                const esGanador = (i + 1) <= plazasTotal;
-                tablaHTML += `<tr class="${esGanador ? 'in-quota' : 'out-quota'}">
+                const admitido = (i + 1) <= plazasTotal;
+                html += `<tr class="${admitido ? 'in-quota' : 'out-quota'}">
                     <td>${i + 1}</td>
                     <td>${p.ci}</td>
                     <td>${p.nota}</td>
-                    <td>${esGanador ? 'ADMITIDO' : 'POSTULANTE'}</td>
+                    <td>${admitido ? 'DENTRO' : 'FUERA'}</td>
                 </tr>`;
             });
-
-            tablaHTML += `</tbody></table>`;
-            div.innerHTML += tablaHTML;
+            html += `</tbody></table>`;
+            contenedor.innerHTML += html;
         }
     }
 </script>
